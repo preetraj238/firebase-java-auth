@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by preetraj on 6/8/17.
  */
 @RestController
+@RequestMapping("/user")
 public class UserService {
 
     @Autowired
@@ -39,5 +40,12 @@ public class UserService {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
     public ResponseEntity<?> updateUser(@RequestBody User user) throws Exception {
         return ResponseEntity.ok(userHelper.updateUserDetails(user));
+    }
+
+    @ApiOperation(value = "authenticateToken", nickname = "authenticateToken")
+    @RequestMapping(method = RequestMethod.POST, path = "/authenticateToken")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
+    public ResponseEntity<?> authenticateToken(@RequestParam("token") String token) throws Exception {
+        return ResponseEntity.ok(userHelper.authenticateToken(token));
     }
 }

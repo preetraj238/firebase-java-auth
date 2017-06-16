@@ -2,7 +2,10 @@ package com.user.authentication.authentication.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseCredential;
+import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.tasks.Task;
@@ -41,6 +44,18 @@ public class UserHelper {
     @Value("${firebase.users.url}")
     private String firebaseUsersUrl;
 
+    @Value("${firebase.database.url}")
+    private String firebaseDatabaseUrl;
+
+    @Value("${firebase.refreshToken.key}")
+    private String refreshToken;
+
+    @Autowired
+    private FirebaseApp firebaseApp;
+
+    @Autowired
+    private FirebaseCredential firebaseCredential;
+
     @PostConstruct
     public void init() {
         usersRef = databaseReference.child("users");
@@ -50,6 +65,11 @@ public class UserHelper {
 
     private static Logger logger = LoggerFactory.getLogger(UserHelper.class);
 
+    /**
+     * @param user
+     * @return
+     * @throws Exception
+     */
     public User createUser(User user) throws Exception {
         String displayName = user.getFirstName().concat(" ").concat(user.getLastName());
         UserRecord record = null;
@@ -80,13 +100,15 @@ public class UserHelper {
         return user;
     }
 
+    /**
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     public List<User> getAllUsers() throws Exception {
         List<User> users = new ArrayList<>();
-
         ResponseEntity<Map> entity = restTemplate.exchange(firebaseUsersUrl,
                 HttpMethod.GET, null, Map.class);
-
         Map<String, Object> result = entity.getBody();
 
         result.forEach((x, y) -> users.add(mapper.convertValue(y, User.class)));
@@ -95,11 +117,37 @@ public class UserHelper {
     }
 
 
+    /**
+     * @param user
+     * @return
+     * @throws Exception
+     */
     public User updateUserDetails(User user) throws Exception {
         Map<String, Object> map = mapper.convertValue(user, new TypeReference<Map<String, Object>>() {
         });
         usersRef.child(user.getPhoneNumber()).updateChildren(map);
 
         return user;
+    }
+
+
+    public FirebaseToken authenticateToken(String firebaseToken) throws Exception {
+
+        firebaseCredential.getAccessToken();
+        FirebaseToken record = null;
+        Task<FirebaseToken> task = firebaseAuth.verifyIdToken(firebaseToken).addOnSuccessListener(userRecord -> {
+            String name = userRecord.getName();
+            logger.info("Successfully validated token id for {}", name);
+            ResponseEntity.ok(firebaseAuth.getUser(name));
+        })
+                .addOnFailureListener(e -> {
+                    logger.error("Error validating token ", e);
+                });
+        while (!task.isComplete()) {
+
+        }
+        record = task.getResult();
+
+        return record;
     }
 }

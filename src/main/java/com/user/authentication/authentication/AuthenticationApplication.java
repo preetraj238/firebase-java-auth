@@ -3,6 +3,7 @@ package com.user.authentication.authentication;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseCredential;
 import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -56,12 +57,17 @@ public class AuthenticationApplication {
     }
 
     @Bean
-    public FirebaseApp firebaseApp() throws Exception {
+    public FirebaseCredential firebaseCredentials() throws Exception {
         FileInputStream serviceAccount =
                 new FileInputStream(serviceAccountKey);
+        return FirebaseCredentials.fromCertificate(serviceAccount);
+    }
+
+    @Bean
+    public FirebaseApp firebaseApp(FirebaseCredential firebaseCredential) throws Exception {
 
         FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
+                .setCredential(firebaseCredential)
                 .setDatabaseUrl(firebaseDatabaseUrl)
                 .build();
 

@@ -1,6 +1,6 @@
 var app = angular.module('firebaseAuth', ['ui.bootstrap']);
 
-app.controller('ctrl', function($scope) {
+app.controller('ctrl', function($scope, $http) {
 
     var config = {
         apiKey: "AIzaSyA1xU9VIYWSSiqs7lwid-BZtk74jTotBkI",
@@ -17,6 +17,7 @@ app.controller('ctrl', function($scope) {
         firebase.auth().signInWithEmailAndPassword(email, password).then(function(result) {
           var token = result.refreshToken;
           var message = "Successfully logged in with token: " + token;
+          $scope.validateToken();
            $scope.$apply(function () {
               $scope.message = message;
               $scope.email='';
@@ -55,8 +56,9 @@ app.controller('ctrl', function($scope) {
         var provider = new firebase.auth.FacebookAuthProvider();
         firebase.auth().signInWithPopup(provider).then(function(result) {
           var token = result.credential.accessToken;
+          $scope.validateToken();
           $scope.$apply(function () {
-             $scope.user = result.user;
+             $scope.user = result.additionalUserInfo.profile;
          });
           console.log($scope.user);
         }).catch(function(error) {
@@ -67,7 +69,7 @@ app.controller('ctrl', function($scope) {
           var credential = error.credential;
           console.log(credential);
           $scope.$apply(function () {
-            $scope.user = "Error while logging in";
+            $scope.user = "Error while logging in " + errorMessage;
            });
         });
     };
@@ -76,8 +78,9 @@ app.controller('ctrl', function($scope) {
         var provider = new firebase.auth.GoogleAuthProvider();
         firebase.auth().signInWithPopup(provider).then(function(result) {
           var token = result.credential.accessToken;
+          $scope.validateToken();
           $scope.$apply(function () {
-             $scope.user = result.user;
+             $scope.user = result.additionalUserInfo.profile;
          });
           console.log($scope.user);
         }).catch(function(error) {
@@ -88,9 +91,22 @@ app.controller('ctrl', function($scope) {
           var credential = error.credential;
           console.log(credential);
           $scope.$apply(function () {
-            $scope.user = "Error while logging in";
+            $scope.user = "Error while logging in " + errorMessage;
            });
         });
         }
 
+    $scope.validateToken = function(){
+        firebase.auth().currentUser.getToken(true).then(function(idToken) {
+            console.log(idToken);
+            var url = '/user/authenticateToken?token=' + idToken;
+            $http.post(url).then(function (response) {
+                $scope.response = response.data;
+              }, function (error) {
+                console.log(error);
+           });
+          }).catch(function(error) {
+           console.log(error);
+         });
+    }
 });

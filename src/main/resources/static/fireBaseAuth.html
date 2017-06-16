@@ -20,7 +20,7 @@
 
     <div class="container">
         <div style="margin-top:20px;">
-            <div ng-if="optionSelected=='email'">
+            <div ng-if="optionSelected=='email'" style="display: table;margin: 0 auto;">
                 <div class="row">
                     <div class="col-md-3">
                         <input class="form-control" type="text" ng-model="email" placeholder="email"
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div ng-show="!optionSelected" style="text-align:center">
+            <div ng-show="!optionSelected" style="display: table;margin: 0 auto;">
                 <div class="row">
                     <div class="col-md-3">
                         <button type="button" class="btn btn-primary" ng-click="loginUsingFaceBook()"
