@@ -1,6 +1,6 @@
 var app = angular.module('firebaseAuth', ['ui.bootstrap']);
 
-app.controller('ctrl', function($scope, $http) {
+app.controller('ctrl', function($scope, $http, $location) {
 
     var config = {
         apiKey: "AIzaSyA1xU9VIYWSSiqs7lwid-BZtk74jTotBkI",
@@ -10,7 +10,29 @@ app.controller('ctrl', function($scope, $http) {
         storageBucket: "userauth-a35f8.appspot.com",
         messagingSenderId: "657104007725"
     };
+
     firebase.initializeApp(config);
+
+    var mailChimpRedirectUrl = $location.$$absUrl;
+    //console.log('$location',mailChimpRedirectUrl);
+
+    $scope.disableMailChimpTokenButton = function(){
+        return mailChimpRedirectUrl.split("?code=")[1];
+    }
+
+
+    $scope.getMailChimpToken = function(){
+    var code = mailChimpRedirectUrl.split("?code=")[1];
+    var url = 'http://localhost:3000/mailchimp/auth/callback?code='+code;
+        $http.get(url).then(function (response) {
+            $scope.mailChimpToken = response.data;
+            console.log($scope.mailChimpToken);
+          }, function (error) {
+            console.log(error);
+       });
+
+     };
+
 
     $scope.login = function(email,password){
     console.log("hello");
