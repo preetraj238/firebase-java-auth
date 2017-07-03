@@ -3,3 +3,5 @@
 3. run 'npm install'
 4. Once all dependencies have been installed, run 'node mailChimpServe.js'
 5. Now, your express server should have started at port 3000 by default
+
+Note: replace clientId and clientSecret in the file before running it
