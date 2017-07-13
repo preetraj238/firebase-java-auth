@@ -12,6 +12,16 @@ app.controller('ctrl', function($scope, $http, $location) {
     };
 
     firebase.initializeApp(config);
+    $scope.phoneUser = {};
+
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-button', {
+      'size': 'invisible',
+      'callback': function(response) {
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+        $scope.signInWithPhoneNumber();
+      }
+    });
+    var appVerifier = window.recaptchaVerifier;
 
     var mailChimpRedirectUrl = $location.$$absUrl;
     //console.log('$location',mailChimpRedirectUrl);
@@ -23,7 +33,8 @@ app.controller('ctrl', function($scope, $http, $location) {
 
     $scope.getMailChimpToken = function(){
     var code = mailChimpRedirectUrl.split("?code=")[1];
-    var url = 'http://localhost:3000/mailchimp/auth/callback?code='+code;
+    //var url = 'http://localhost:3000/mailchimp/auth/callback?code='+code;
+    var url = '/mailChimp/authToken?code='+code;
         $http.get(url).then(function (response) {
             $scope.mailChimpToken = response.data;
             console.log($scope.mailChimpToken);
@@ -118,6 +129,26 @@ app.controller('ctrl', function($scope, $http, $location) {
         });
         }
 
+     $scope.signInWithPhoneNumber = function(phoneNumber){
+
+     firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+         .then(function (confirmationResult) {
+         $scope.verificationId = confirmationResult.verificationId;
+         //$scope.toggleOption('verify');
+         $scope.optionSelected='verify';
+         $scope.$apply();
+         console.log(confirmationResult);
+           // SMS sent. Prompt user to type the code from the message, then sign the
+           // user in with confirmationResult.confirm(code).
+           window.confirmationResult = confirmationResult;
+         }).catch(function (error) {
+         console.log(error);
+           // Error; SMS not sent
+           // ...
+         });
+
+     }
+
     $scope.validateToken = function(){
         firebase.auth().currentUser.getToken(true).then(function(idToken) {
             console.log(idToken);
@@ -130,5 +161,21 @@ app.controller('ctrl', function($scope, $http, $location) {
           }).catch(function(error) {
            console.log(error);
          });
+    }
+
+    $scope.validate = function(verificationCode){
+        /*var credential = firebase.auth.PhoneAuthProvider.credential($scope.verificationId, verificationCode);
+        firebase.auth().signInWithCredential(credential);*/
+        //var code = getCodeFromUserInput();
+        confirmationResult.confirm(verificationCode).then(function (result) {
+          // User signed in successfully.
+          $scope.phoneUser = result.user;
+          $scope.$apply();
+          console.log(phoneUser);
+          // ...
+        }).catch(function (error) {
+          // User couldn't sign in (bad verification code?)
+          // ...
+        });
     }
 });

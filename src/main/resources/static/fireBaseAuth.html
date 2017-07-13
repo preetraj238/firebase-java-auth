@@ -13,6 +13,7 @@
 
 
 
+
 </style>
 <body>
 
@@ -67,11 +68,19 @@
                         </button>
                     </div>
                 </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary" ng-click="toggleOption('phoneNumber')"
+                                style="width:250px;background-color: black;">Login Using PhoneNumber
+                        </button>
+                    </div>
+                </div>
 
                 <br>
-                <a ng-show="!disableMailChimpTokenButton()" style="width: 250px;" class="btn btn-primary" href="https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id=883724299212&redirect_uri=http://127.0.0.1:8880/firebaseAuth.html">
+                <a ng-show="!disableMailChimpTokenButton()" style="width: 250px;" class="btn btn-primary"
+                   href="https://login.mailchimp.com/oauth2/authorize?response_type=code&client_id=883724299212&redirect_uri=http://127.0.0.1:8880/firebaseAuth.html">
                     Authorize User with MailChimp</a>
-
                 <br>
                 <br>
                 <div class="row" ng-show="disableMailChimpTokenButton()">
@@ -94,6 +103,33 @@
                 <div class="row" ng-if="user">
                     <span ng-class="{'has-error': loginError}">{{user}}</span>
                 </div>
+            </div>
+
+            <div ng-show="optionSelected=='phoneNumber'" style="display: table;margin: 0 auto;"
+                 id="recaptcha-container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input class="form-control" type="text" ng-model="phone" placeholder="Phone Number"
+                               style="width: 300px;"><br>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="sign-in-button"
+                        ng-click="signInWithPhoneNumber(phone)" style="width: 300px;background-color: black;">Login
+                </button>
+            </div>
+            <div ng-show="optionSelected=='verify'" style="display: table;margin: 0 auto;">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input class="form-control" type="text" ng-model="verificationCode" placeholder="code"
+                               style="width: 300px;"><br>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary"
+                        ng-click="validate(verificationCode)" style="width: 300px;background-color: black;">Validate
+                </button>
+                <span>{{phoneUser}}</span>
             </div>
         </div>
     </div>
